@@ -1,0 +1,320 @@
+//-----------------------------------------------------------------------
+// AUTHOR:          Olivia Leary
+// FILENAME:        Lab 5.cpp
+// SPECIFICATION:   This lab changes creates a binary tree and offers
+//                  users a few options to manipulate the tree.
+// FOR:             CS 2413 Data Structures Section 504
+
+#include <iostream>
+
+#include <iomanip>
+
+#include <stdlib.h>
+
+#include <malloc.h>
+
+#include <queue>
+
+using namespace std;
+
+struct node{
+
+    int data;           //value in node
+
+    struct node *left;  //left pointer of node
+
+    struct node *right; //right pointer of node
+};
+
+// --------------------------------------------------------------------------------
+// NAME: 			insert_node
+// INPUT Param.:	*root, data
+// OUTPUT Param.:	This function returns the node
+// PURPOSE:			This function is used to create a new node and insert it 
+//                  in the binary tree.
+struct node *insert_node(struct node *root, int data)
+{
+    struct node* temp = (struct node*)malloc(sizeof(struct node));  //used to represent the root node
+
+    struct node *current;                                           //used to represent the current location
+
+    struct node *parent;                                            //used to represent the parent node
+
+    temp->data = data;
+
+    temp->left= NULL;
+
+    temp->right=NULL;
+    
+    if(root == NULL)
+    {
+        root = temp;
+
+        root->left =NULL;
+
+        root->right=NULL;
+    }
+
+    else
+    {
+        current = root;
+
+        parent = NULL;
+
+        while(current != NULL)
+        {
+            parent =current;
+
+            if(data<current->data)
+                current=current->left;
+
+            else
+                current = current->right;
+        }
+        if(data<parent->data)
+            parent->left=temp;
+
+        else
+            parent->right=temp;
+    }
+    return(root);  
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			search_for_node
+// INPUT Param.:	*root, data
+// OUTPUT Param.:	This function returns either true or false
+// PURPOSE:			This function is used to go through the tree to locate the 
+//                  number inputted by the user. If it is found, the function 
+//                  will return true, otherwise it will return false.
+bool search_for_node(struct node *root,int data)
+{
+    if(root == NULL)
+    {
+        return false;
+    }
+    bool left = search_for_node(root->left, data);
+
+    bool right =  search_for_node(root->right, data);
+
+    return(left || right || root->data == data);
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			print_search
+// INPUT Param.:	*root, data
+// OUTPUT Param.:	This function does not return anything.
+// PURPOSE:			This function is used to display the path that is taken 
+//                  to locate the number searched for by the user.
+void print_search(struct node *root, int data)
+{
+    while (root->data != data)
+    {
+        if(data > root->data)
+        {
+            cout << "->" << root->data;
+
+            root = root->right;
+        }
+
+        else
+        {
+            cout << "->" << root->data;
+
+            root = root->left;
+        }
+    }
+    cout << "->" << root->data << endl;
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			findlargestnode
+// INPUT Param.:	*root
+// OUTPUT Param.:	This function returns the largest right value
+// PURPOSE:			Used to locate the largest value in the tree.
+struct node *findlargestnode(struct node *root)
+{
+    if((root == NULL) || (root->right == NULL))
+        return root;
+    else
+        return(findlargestnode(root->right));
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			delete_node
+// INPUT Param.:	root, data
+// OUTPUT Param.:	This function returns the new tree with the node deleted.
+// PURPOSE:			This fuction is used to delete a given value by the user.
+struct node *delete_node(struct node *root, int data)
+{
+    if(root ==NULL)
+    {
+        return root;
+    }
+
+    else if(data < root->data)
+    {
+        root->left= delete_node(root->left,data);
+    }
+
+    else if(data > root->data)
+    {
+       root->right=delete_node(root->right,data);
+    }
+
+    else if(root->left && root->right)
+    {
+        struct node *temp = findlargestnode(root->left);
+
+        root->data = temp->data;
+
+        delete_node(root->left, temp->data);
+    }
+    else
+    {
+        struct node *temp = root;
+
+        if(root->left==NULL && root->right ==NULL)
+        {
+            root = NULL;
+        }
+
+        else if(root->left != NULL)
+        {
+            root= root->left;
+        }
+
+        else
+            root = root->right;
+        
+        free(temp);
+    }
+
+    return(root);
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			display_tree
+// INPUT Param.:	root
+// OUTPUT Param.:	This function does not retun anything
+// PURPOSE:			This function is used to print out the created tree.
+void display_tree(struct node *root)
+{
+    if(root == NULL)
+        cout << "Tree is empty";
+    else
+    {
+        queue<struct node*> q;
+
+        q.push(root);
+
+        while(!q.empty())
+        {
+            int size = static_cast<int>(q.size());
+
+            for(size; size > 0; size--)
+            {
+                node *node = q.front();
+
+                cout << node->data << " ";
+
+                q.pop();
+
+                if(node->left != NULL)
+                    q.push(node->left);
+                
+                if(node->right != NULL)
+                    q.push(node->right);
+            }
+            cout << endl;
+        }
+    }
+}
+
+int main(void)
+{
+    int choice;             //users choice from menu options
+
+    int num;                //number to be searched for
+
+    int num_delete;         //number to be deleted
+
+    struct node *root = NULL;
+
+    while(choice != 5)
+    {
+        cout << "---------------------MENU-------------------" << endl;
+
+        cout << "1.) Create an integer binary tree" << endl;
+
+        cout << "2.) Display the tree in the specific console" << endl;
+
+        cout << "3.) Remove a specific node in the tree" << endl;
+
+        cout << "4.) Search for an item in the tree" << endl;
+
+        cout << "5.) End the program" << endl; 
+
+        cout << "Please enter your choice: ";
+
+        cin >> choice;
+
+        cout << endl;
+
+        switch(choice)
+        {
+            case 1:
+                for(int i = 0; i < 7; i++)
+                {
+                    root= insert_node(root, rand() % 10);
+                }
+
+                break;
+
+            case 2:
+                display_tree(root);
+
+                break;
+
+            case 3:
+                cout << "Please enter number to be deleted: ";
+
+                cin >> num_delete;
+
+                cout << endl;
+
+                root = delete_node(root, num_delete);
+
+                break;
+
+            case 4:
+                cout << "Please enter a number to be searched for in the tree: ";
+
+                cin>> num;
+
+                cout << endl;
+
+                if(search_for_node(root, num) == true)
+                {
+                    print_search(root,num);
+                }
+                else
+                {
+                    cout <<"This number cannot be found." << endl;
+                }
+                
+                break;
+
+            case 5:
+                choice = 5;
+
+                break;
+
+            default:
+                cout << "You have entered invalid data." <<endl;
+                break;
+        }
+    }
+
+    return(0);
+}

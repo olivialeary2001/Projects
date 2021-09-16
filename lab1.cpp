@@ -1,0 +1,260 @@
+//-----------------------------------------------------------------------
+// AUTHOR:          Olivia Leary
+// FILENAME:        lab1.cpp
+// SPECIFICATION:   This lab is to create a menu driven program that 
+//					performs user chosen actions to a linked list.
+// FOR:             CS 2413 Data Structures Section 504
+
+#include <iostream>
+
+#include <iomanip>
+
+#include <stdlib.h>
+
+#include <malloc.h>
+
+using namespace std;
+
+struct node
+{
+	int data;				//value in node
+	
+	struct node *next;		//pointer to next node
+};
+
+// --------------------------------------------------------------------------------
+// NAME: 			display
+// INPUT Param.:	*aStart
+// OUTPUT Param.:	aStart
+// PURPOSE:			This function prints out the linked list.
+struct node *display(struct node *aStart)
+{
+	struct node *ptr;    
+
+	ptr = aStart;      
+
+  	cout << "START ";
+
+  	while(ptr != NULL)
+		{
+		 cout << " --> " << ptr->data;	
+
+		 ptr = ptr -> next;                       
+		}
+  	cout << " --> NULL." << endl;   
+
+	return aStart;
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			insert_beg
+// INPUT Param.:	*start, num
+// OUTPUT Param.:	This function does not return anything
+// PURPOSE:			Used to insert node at the beggining of the linked list.
+struct node *insert_beg(struct node *aStart,int num)
+{
+	struct node *new_node;    
+
+	new_node = (node *)malloc(sizeof( struct node));  
+
+	new_node -> data = num;                      
+
+	new_node -> next = aStart;     
+
+	aStart = new_node;        
+
+	return aStart;
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			sort_list
+// INPUT Param.:	head
+// OUTPUT Param.:	This function does not return anything
+// PURPOSE:			This function sorts the linked list using bubble sort.
+
+void sort_list(struct node *head)
+{
+	int i = 0;					//used to show that the variables swapped
+
+	int temp;					//used to hold temporary value when swapping
+
+	struct node *left;			//first node in list
+
+	struct node *right = NULL;	//last node in list
+	
+	do
+	{
+		i = 0;
+
+		left = head;
+
+		while(left ->next != right)
+		{
+			if(left->data > left->next->data)
+			{
+				temp = left->data;
+
+				left->data = left->next->data;
+
+				left->next->data = temp;
+
+				i = 1;
+			}
+			left = left->next;
+		}
+		right = left;
+
+	} while(i == 1);
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			check_list
+// INPUT Param.:	head
+// OUTPUT Param.:	new_head
+// PURPOSE:			used to check the linked list for duplicates and then
+//					add those duplicates into the newly returned linked list	
+
+struct node* check_list(struct node *head)	
+{
+	struct node* new_head = NULL;	//new list to hold duplicates
+
+	struct node *left = head;		//first node in list
+
+	struct node *right;				//second node in list
+	
+	while(left != NULL)
+	{
+		right = left->next;
+
+		while(right != NULL)
+		{
+			if(left->data == right->data)
+			{
+				new_head = insert_beg(new_head, left->data);
+
+			}
+			right = right->next;
+		}
+		left = left->next;
+	}
+	return(new_head);
+}
+
+// --------------------------------------------------------------------------------
+// NAME: 			delete_doubles
+// INPUT Param.:	head
+// OUTPUT Param.:	This function does not return anything
+// PURPOSE:			This function looks to see if the data in two nodes are the same.
+// 					If so, this function will make the left position point to the next 
+//					next position. This will delete the next poistion from the linked list. 
+
+void delete_doubles(struct node *head)	
+{
+	struct node* temp;			//used to hold temporary data
+
+	struct node *left = head;	//used to point to next node
+
+	struct node *right;			//first position of linked list
+	
+	while(left != NULL)
+	{
+		right = left;
+		while(right->next != NULL)
+		{
+			if(left->data == right->next->data)
+			{
+				temp = right->next;
+
+				right->next = right->next->next;
+
+				free(temp);
+			}
+			right = right->next;
+		}
+		left = left->next;
+	}
+}
+
+int main(void)
+{
+	struct node* head = NULL;	//used to make a linked list
+
+	struct node* new_list;		//used to make another linked list for the duplicates
+
+	int choice;					//used to get the user's choice from the menu
+
+	int choice_for_duplicate;	//used to get the user's choice to either delete or keep the duplicate
+
+	while(choice != 5){
+
+		cout <<"-------------------------------" << endl;
+
+		cout << "1.) Create Linked List" <<endl;
+
+		cout << "2.) Print List" << endl;
+
+		cout << "3.) Sort List" <<endl;
+
+		cout << "4.) Check for Duplicates" << endl;
+
+		cout << "5.) Quit." <<endl;
+
+		cout <<"-------------------------------" << endl;
+
+		cout << "Pick an option: " << endl;
+
+		cin >> choice;
+
+		switch(choice) {
+
+  			case 1:
+				head = NULL;
+
+				for(int i = 0; i < 20; i ++)
+				{
+					head = insert_beg(head,(rand() % 100));
+
+				}
+    			break;
+
+  			case 2:
+    			display(head);
+
+    			break;
+
+			case 3:
+    			sort_list(head);
+
+    			break;
+
+  			case 4:
+    			new_list = check_list(head);
+
+				if(new_list != NULL)
+				{
+					display(new_list);
+
+					cout << "Would you like to delete the duplicate numbers? (1 for yes & 2 for no)" << endl;
+
+					cin >> choice_for_duplicate;
+
+					if (choice_for_duplicate == 1)
+					{
+						delete_doubles(head);
+					}
+				}
+				else
+					cout << "There are no duplicates." << endl;
+    			
+				break;
+
+			case 5:
+				choice = 5;
+    			break;
+
+  			default:
+    			cout << "You entered an invalid choice." << endl;
+		}
+	}
+    return 0;
+}

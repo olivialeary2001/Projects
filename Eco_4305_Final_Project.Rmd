@@ -1,0 +1,179 @@
+---
+title: "Eco 4305 Final Project"
+author: "Olivia Leary"
+date: "12/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(wooldridge)
+library(tidyverse)
+library(expss)
+```
+
+```{r}
+setwd("C:/Users/olivi/Desktop/Econometrics")
+dir()
+```
+
+```{r}
+load("cps_data.RData")
+summary(cps_data)
+ls()
+```
+
+## Making Education Dummy Variables
+```{r}
+#I need to create these in order to have an individuals education level
+#same for education
+prop.table(table(cps_data$educ))
+val_lab(cps_data$educ) = num_lab("
+                          1 LTHS
+                          2 HS
+                          3 Some College
+                          4 College
+                          5 Advanced
+                          ")
+
+prop.table(table(cps_data$educ))
+
+cps_data <- transform(cps_data,
+  lths = ifelse(cps_data$educ == 1, 1, 0),
+  hs = ifelse(cps_data$educ == 2, 1, 0),
+  somecol = ifelse(cps_data$educ == 3, 1, 0),
+  college = ifelse(cps_data$educ == 4, 1, 0),
+  advanced = ifelse(cps_data$educ == 5, 1, 0)
+)
+
+```
+
+
+## Question 2: Constructing Dummy Variables
+```{r}
+#These variables are being created in order to see an individuals employment status
+
+prop.table(table(cps_data$lfstat))
+
+val_lab(cps_data$lfstat) = num_lab("
+                          1 Employed
+                          2 Unemployed
+                          3 NILF
+                          ")
+
+prop.table(table(cps_data$lfstat))
+
+cps_data <- transform(cps_data,
+  empl_test = ifelse(cps_data$lfstat == 1, 1, 0),
+  unemp_test = ifelse(cps_data$lfstat == 2, 1, 0),
+  nilf_test = ifelse(cps_data$lfstat == 3, 1, 0)
+)
+#Now I will show that the dummy variables are mutually exclusive by showing that the mean of these is summed to 1
+summary(cps_data$empl_test)
+
+summary(cps_data$unemp_test)
+
+summary(cps_data$nilf_test)
+
+prop.table(table(cps_data$lfstat))
+
+total = mean(cps_data$empl_test, na.rm = TRUE) + mean(cps_data$unemp_test, na.rm = TRUE) + mean(cps_data$nilf_test, na.rm = TRUE)
+
+total
+```
+
+As it can be seen, the means perfectly add up to 1, making them mutually exclusive.
+
+## Question 3
+```{r}
+#The correlation between rw and state
+cor_test <- cor.test(cps_data$rw, cps_data$state)
+cor_test
+
+#The correlation between rw and age
+cor_test1 <-cor.test(cps_data$rw, cps_data$age)
+cor_test1
+
+#The correlation between rw and college
+cor_test2 <-cor.test(cps_data$rw, cps_data$college)
+cor_test2
+
+#The correlation between rw and sex
+cor_test3 <-cor.test(cps_data$rw, cps_data$female)
+cor_test3
+
+#The correlation between rw and metro
+cor_test4 <-cor.test(cps_data$rw, cps_data$metro)
+cor_test4
+```
+
+## Produce Summary Statistics
+```{r}
+#Summary of rw
+summary(cps_data$rw)
+
+#Summary of state
+summary(cps_data$state)
+
+#Summary of age
+summary(cps_data$age)
+
+#Summary of college
+summary(cps_data$college)
+
+#Summary of female
+summary(cps_data$female)
+
+#Summary of metro
+summary(cps_data$metro)
+```
+
+## Question 4
+
+Next, we will perform a regression analysis using the following equation:
+
+$$
+wage_i= \beta_0 + \beta_1State_i + \beta_2Age_i + \beta_3College_i + \beta_4Female_i + \beta_5Metro_i +  u_i
+$$
+Before we factor in any specifications, let us just look at the broad model.
+```{r}
+modell <- lm(log(rw) ~ state + age + college + female + metro, data=cps_data)
+summary(modell)
+```
+
+Before we factor in specific locations, Let us first look an individual who has a college degree and just presumably graduated.
+```{r}
+model <- lm(log(rw) ~ state + age + college + female + metro, data=cps_data, 
+             subset=(college == 1 & (age>22 & age < 25)))
+summary(model)
+```
+
+Now, let us look at individual with the same stipulations as above but also lives in Texas.
+```{r}
+model2 <- lm(log(rw) ~ state + age + college + female + metro, data=cps_data, 
+             subset=(college == 1 & (age>22 & age < 25) & state == 74))
+summary(model2)
+```
+
+Now, we will look at the same individual from model two except they now also live in Colorado. 
+
+```{r}
+model3 <- lm(log(rw) ~ state + age + college + female + metro, data=cps_data, 
+             subset=(college == 1 & (age>22 & age < 25) & state == 84))
+summary(model3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
